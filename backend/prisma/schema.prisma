@@ -1,0 +1,50 @@
+// This is the Prisma schema file that defines the data models and their relationships
+// It is used by Prisma to interact with the database through migrations and the Prisma Client.
+
+datasource db {
+  provider = "postgresql"  // Database provider (e.g., PostgreSQL, MySQL, SQLite, etc.)
+  url      = env("DATABASE_URL")  // The database URL from environment variables
+}
+
+generator client {
+  provider = "prisma-client-js"  // Generates Prisma Client for interacting with the database
+}
+
+model User {
+  id        Int      @id @default(autoincrement())  // Primary key, auto-incremented
+  username  String   @unique  // Unique username for each user
+  email     String   @unique  // Unique email for each user
+  password  String   // Password (hashed)
+  reviews   Review[] // One-to-many relationship (user can have many reviews)
+  orders    Order[]  // One-to-many relationship (user can have many orders)
+}
+
+model City {
+  id          Int       @id @default(autoincrement())  // Primary key, auto-incremented
+  name        String    // Name of the city
+  description String    // Description of the city
+  price       Float     // Price of the city
+  reviews     Review[]  // One-to-many relationship (city can have many reviews)
+  orders      Order[]   // One-to-many relationship (city can have many orders)
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())  // Primary key, auto-incremented
+  userId    Int      // Foreign key for the user who wrote the review
+  cityId    Int      // Foreign key for the city being reviewed
+  rating    Int      // Rating (e.g., 1-5 stars)
+  comment   String   // Review comment
+  user      User     @relation(fields: [userId], references: [id])  // Relation to User model
+  city      City     @relation(fields: [cityId], references: [id])  // Relation to City model
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())  // Primary key, auto-incremented
+  userId      Int      // Foreign key for the user who made the order
+  cityId      Int      // Foreign key for the city being purchased
+  quantity    Int      // Quantity of cities ordered
+  totalPrice  Float    // Total price of the order
+  status      String   // Order status (e.g., "pending", "shipped", "delivered")
+  user        User     @relation(fields: [userId], references: [id])  // Relation to User model
+  city        City     @relation(fields: [cityId], references: [id])  // Relation to City model
+}
